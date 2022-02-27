@@ -38,7 +38,7 @@ your-computer:~/your-directory/this-project-name$ main.py
 Программа использует API веб-сервисов https://hh.ru, https://superjob.ru. 
 С информацией о данных API можно ознакомиться здесь: https://api.superjob.ru/
 и здесь: https://dev.hh.ru/.
-В случае, если Вы хотите скорректировать те либо иные параметры запроса и/или добавит иные параметры запроса, это возможно сделать в файле `language_dataset_getter.py` в словарях `payload` функций `get_language_dataset_hh` и `get_language_dataset_superJob` для API HeadHunter и SuperJob, соответственно:
+В случае, если Вы хотите скорректировать те либо иные параметры запроса и/или добавить иные параметры запроса, предусмотренные API вышеуказанных сервисов, это возможно сделать в файле `language_dataset_getter.py` в словарях `payload` функций `get_language_dataset_hh` и `get_language_dataset_superJob` для API HeadHunter и SuperJob, соответственно:
 
 ```python
 
@@ -75,8 +75,7 @@ def get_language_dataset_superJob(language_name, api_token_sj):
         'count': '100',
         'page': page
     }
-
-
+    ...
 ```
 
 
