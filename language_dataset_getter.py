@@ -1,42 +1,46 @@
 import requests
-from statistics import mean
+from itertools import count
+from statistics import mean, StatisticsError
 from salary_predictor import predict_rub_salary_for_superJob, predict_rub_salary_for_hh
-
 
 def get_language_dataset_hh(language_name, api_token_hh=None):
 
-    vacancies_on_page = []
-    page, pages = 0, 1
     url = 'https://api.hh.ru/vacancies'
     payload = {
         'text': f'программист {language_name}',
         'area': '1',
         'period': '30',
         'per_page': '100',
-        'page': page,
+        'page': 0,
     }
 
-    vacancies_found = requests.get(url, params=payload).json()['found']
+    vacancies_pages = []
 
-    while page < pages:
+    for page in count():
         payload['page'] = page
-        page_response = requests.get(url, params=payload)
+        page_response = requests.get(url=url, params=payload)
         page_response.raise_for_status()
-        pages = page_response.json()['pages']
-        page += 1
-        vacancies_on_page.append(page_response.json()['items'])
+        page_data = page_response.json()
+        vacancies_found = page_data['found']
+        vacancies_pages.append(page_data['items'])
+        if (page >= page_data['pages']) or (page >= 19):
+            break
 
-    vacancies = [j for i in vacancies_on_page for j in i]
+    vacancies = [vacancie for vacancie_page in vacancies_pages for vacancie in vacancie_page]
     salaries_processed = []
     for vacancy in vacancies:
-        if predict_rub_salary_for_hh(vacancy):
-            salaries_processed.append(predict_rub_salary_for_hh(vacancy))
-    average_salary = mean(salaries_processed)
+        salary = predict_rub_salary_for_hh(vacancy)
+        if salary:
+            salaries_processed.append(salary)
+    try:
+        average_salary = int(mean(salaries_processed))
+    except StatisticsError:
+        average_salary = None
 
     hh_language_dataset = {
                 "vacancies_found": vacancies_found,
                 "vacancies_processed": len(salaries_processed),
-                "average_salary": int(average_salary),
+                "average_salary": average_salary,
     }
 
     return hh_language_dataset
@@ -44,8 +48,6 @@ def get_language_dataset_hh(language_name, api_token_hh=None):
 
 def get_language_dataset_superJob(language_name, api_token_sj):
 
-    vacancies_on_page = []
-    page = 0
     url = 'https://api.superjob.ru/2.0/vacancies/'
     headers = {
         'X-Api-App-Id': api_token_sj,
@@ -56,33 +58,36 @@ def get_language_dataset_superJob(language_name, api_token_sj):
         'date_published_from': '1642896000',
         'town': '4',
         'count': '100',
-        'page': page
+        'page': 0
     }
 
-    next_page = True
+    vacancies_pages = []
 
-    vacancies_found = 0
-
-    while next_page:
-        page_response = requests.get(url, headers=headers, params=payload)
-        vacancies_found = page_response.json()['total']
-        page_data = page_response.json()['objects']
-        vacancies_on_page.append(page_data)
-        next_page = page_response.json()['more']
-        page += 1
+    for page in count():
         payload['page'] = page
+        page_response = requests.get(url=url, headers=headers, params=payload)
+        page_response.raise_for_status()
+        page_data = page_response.json()
+        vacancies_found = page_data['total']
+        vacancies_pages.append(page_data['objects'])
+        if page_data['more'] is False:
+            break
 
-    vacancies = [j for i in vacancies_on_page for j in i]
+    vacancies = [vacancie for vacancie_page in vacancies_pages for vacancie in vacancie_page]
     salaries_processed = []
     for vacancy in vacancies:
-        if predict_rub_salary_for_superJob(vacancy):
-            salaries_processed.append(predict_rub_salary_for_superJob(vacancy))
-    average_salary = mean(salaries_processed)
+        salary = predict_rub_salary_for_superJob(vacancy)
+        if salary:
+            salaries_processed.append(salary)
+        try:
+            average_salary = int(mean(salaries_processed))
+        except StatisticsError:
+            average_salary = None
 
     superJob_language_dataset = {
         "vacancies_found": vacancies_found,
         "vacancies_processed": len(salaries_processed),
-        "average_salary": int(average_salary),
+        "average_salary": average_salary,
     }
 
     return superJob_language_dataset
