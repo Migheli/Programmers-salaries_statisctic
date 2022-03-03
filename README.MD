@@ -44,15 +44,13 @@ your-computer:~/your-directory/this-project-name$ main.py
 
 def get_language_dataset_hh(language_name, api_token_hh=None):
 
-    vacancies_on_page = []
-    page, pages = 0, 1
     url = 'https://api.hh.ru/vacancies'
     payload = {
         'text': f'программист {language_name}',
         'area': '1',
         'period': '30',
         'per_page': '100',
-        'page': page,
+        'page': 0,
     }
     ...
 ```
@@ -61,8 +59,6 @@ def get_language_dataset_hh(language_name, api_token_hh=None):
 
 def get_language_dataset_superJob(language_name, api_token_sj):
 
-    vacancies_on_page = []
-    page = 0
     url = 'https://api.superjob.ru/2.0/vacancies/'
     headers = {
         'X-Api-App-Id': api_token_sj,
@@ -73,7 +69,7 @@ def get_language_dataset_superJob(language_name, api_token_sj):
         'date_published_from': '1642896000',
         'town': '4',
         'count': '100',
-        'page': page
+        'page': 0
     }
     ...
 ```
