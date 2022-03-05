@@ -1,9 +1,10 @@
 import requests
 from itertools import count
 from statistics import mean, StatisticsError
-from salary_predictor import predict_rub_salary_for_superJob, predict_rub_salary_for_hh
+from salary_predictor import predict_rub_salary_for_sj, predict_rub_salary_for_hh
 
-def get_language_dataset_hh(language_name, api_token_hh=None):
+
+def get_language_dataset_hh(language_name):
 
     url = 'https://api.hh.ru/vacancies'
     payload = {
@@ -32,10 +33,10 @@ def get_language_dataset_hh(language_name, api_token_hh=None):
         salary = predict_rub_salary_for_hh(vacancy)
         if salary:
             salaries_processed.append(salary)
-    try:
-        average_salary = int(mean(salaries_processed))
-    except StatisticsError:
-        average_salary = None
+            try:
+                average_salary = int(mean(salaries_processed))
+            except StatisticsError:
+                average_salary = None
 
     hh_language_dataset = {
                 "vacancies_found": vacancies_found,
@@ -46,7 +47,7 @@ def get_language_dataset_hh(language_name, api_token_hh=None):
     return hh_language_dataset
 
 
-def get_language_dataset_superJob(language_name, api_token_sj):
+def get_language_dataset_sj(language_name, api_token_sj):
 
     url = 'https://api.superjob.ru/2.0/vacancies/'
     headers = {
@@ -70,24 +71,24 @@ def get_language_dataset_superJob(language_name, api_token_sj):
         page_data = page_response.json()
         vacancies_found = page_data['total']
         vacancies_pages.append(page_data['objects'])
-        if page_data['more'] is False:
+        if not page_data['more']:
             break
 
     vacancies = [vacancie for vacancie_page in vacancies_pages for vacancie in vacancie_page]
     salaries_processed = []
     for vacancy in vacancies:
-        salary = predict_rub_salary_for_superJob(vacancy)
+        salary = predict_rub_salary_for_sj(vacancy)
         if salary:
             salaries_processed.append(salary)
-        try:
-            average_salary = int(mean(salaries_processed))
-        except StatisticsError:
-            average_salary = None
+            try:
+                average_salary = int(mean(salaries_processed))
+            except StatisticsError:
+                average_salary = None
 
-    superJob_language_dataset = {
+    sj_language_dataset = {
         "vacancies_found": vacancies_found,
         "vacancies_processed": len(salaries_processed),
         "average_salary": average_salary,
     }
 
-    return superJob_language_dataset
+    return sj_language_dataset
