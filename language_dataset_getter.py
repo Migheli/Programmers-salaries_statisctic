@@ -33,10 +33,10 @@ def get_language_dataset_hh(language_name):
         salary = predict_rub_salary_for_hh(vacancy)
         if salary:
             salaries_processed.append(salary)
-            try:
-                average_salary = int(mean(salaries_processed))
-            except StatisticsError:
-                average_salary = None
+    try:
+        average_salary = int(mean(salaries_processed))
+    except StatisticsError:
+        average_salary = None
 
     hh_language_dataset = {
                 "vacancies_found": vacancies_found,
@@ -80,10 +80,10 @@ def get_language_dataset_sj(language_name, api_token_sj):
         salary = predict_rub_salary_for_sj(vacancy)
         if salary:
             salaries_processed.append(salary)
-            try:
-                average_salary = int(mean(salaries_processed))
-            except StatisticsError:
-                average_salary = None
+    try:
+        average_salary = int(mean(salaries_processed))
+    except StatisticsError:
+        average_salary = None
 
     sj_language_dataset = {
         "vacancies_found": vacancies_found,
